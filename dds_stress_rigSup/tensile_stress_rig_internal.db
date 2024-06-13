@@ -1,15 +1,18 @@
 record(ai, "$(P)ELONG") {
     field(DESC, "Elongation read from array")
     field(INP, "$(P)ARRAY.[0] CP MS")
+    field(EGU, "um")
 }
 
 record(ai, "$(P)LOAD") {
     field(DESC, "Load read from array")
     field(INP, "$(P)ARRAY.[1] CP MS")
+    field(EGU, "N")
 }
 
 record(ao, "$(P)LOAD:SP") {
     field(DESC, "Set-point for load")
+    field(EGU, "N")
 }
 
 record(ai, "$(P)TIME") {
@@ -97,6 +100,7 @@ record(seq, "$(P)START"){
 
 record(ao, "$(P)TRGT") {
     field(DESC, "Target Value")
+    field(EGU, "um")
 }
 
 record(calc, "$(P)_START_LIMIT") {
