@@ -14,7 +14,7 @@ IOCS = [
     {
         "name": DEVICE_PREFIX,
         "directory": get_default_ioc_dir("DDSSTRES"),
-        "macros": {},
+        "macros": {"IPADDR":"127.0.0.1", "VI_PATH":"C:/instrument/dev/ibex_vis/"},
         "emulator": "dds_stress_rig",
     },
 ]
