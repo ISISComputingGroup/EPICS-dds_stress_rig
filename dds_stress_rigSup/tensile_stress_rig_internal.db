@@ -27,7 +27,7 @@ record(calc, "$(P)MOT:ACTIV") {
 }
 
 record(seq, "$(P)CHANGE_SPEED"){
-    field(DESC, "Comnand Sequence to set Speed.")
+    field(DESC, "Command Sequence to set Speed.")
     field(DO0, "1")
     field(LNK0, "$(P)MODE:SPEED:SP PP")
     field(DO1, "0")
@@ -53,7 +53,7 @@ record(ao, "$(P)SPEED:SP") {
 }
 
 record(seq, "$(P)START"){
-    field(DESC, "Comnand Sequence to request a Start.")
+    field(DESC, "Command Sequence to request a Start.")
     field(DO0, "1")
     field(LNK0, "$(P)MEAS:STOP:SP PP")
     field(DO1, "1")
@@ -111,7 +111,7 @@ record(calc, "$(P)_START_LIMIT") {
 }
 
 record(seq, "$(P)SET_LOAD"){
-    field(DESC, "Comnand Sequence to set a load.")
+    field(DESC, "Command Sequence to set a load.")
     field(DO0, "1")
     field(LNK0, "$(P)MEAS:STOP:SP PP")
     field(DO1, "2")
