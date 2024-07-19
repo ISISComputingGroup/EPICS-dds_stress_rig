@@ -21,7 +21,7 @@ record(ai, "$(P)TIME") {
 }
 
 record(calc, "$(P)MOT:ACTIV") {
-    field(DESC, "description")
+    field(DESC, "Motor Moving")
     field(CALC, "a!=0")
     field(INPA, "$(P)MOT:STAT CP MS")
 }
@@ -104,7 +104,7 @@ record(ao, "$(P)TRGT") {
 }
 
 record(calc, "$(P)_START_LIMIT") {
-    field(DESC, "description")
+    field(DESC, "Start sequence limit mask")
     field(CALC, "a>b?13823:15103")
     field(INPA, "$(P)TRGT CP MS")
     field(INPB, "$(P)ELONG CP MS")
