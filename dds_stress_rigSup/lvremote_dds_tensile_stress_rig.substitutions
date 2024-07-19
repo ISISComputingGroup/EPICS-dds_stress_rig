@@ -1,0 +1,53 @@
+file $(LVREMOTE)/data/lvremote_header.template {
+    pattern { RECSIM, DISABLE }
+    { "\$(RECSIM)", "\$(DISABLE)", }
+}
+
+
+file  $(LVREMOTE)/data/lvremote_binary.template { 
+  pattern 
+    {P, NAME, IND, CONTROL, ZERO, ONE, VI, PORT, READONLY, DESCRIPTION, SCAN, HIGH}
+    
+    {"\$(P)", "ULIMIT:ENABLED", "EnableUL", "EnableUL", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Enable Upper Limit", "1 second", ""}
+    {"\$(P)", "LLIMIT:ENABLED", "EnableLL", "EnableLL", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Enable Lower Limit", "1 second", ""}
+    {"\$(P)", "SPEED:SET", "SetSpeed", "SetSpeed", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Set Speed", "1 second", "0.1"},
+    {"\$(P)", "READ:START", "StartRead", "StartRead", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Start Reading", "1 second", "0.1"},
+    {"\$(P)", "READ:STOP", "StopRead", "StopRead", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Stop Reading", "1 second", "0.1"},
+    {"\$(P)", "MEAS:START", "StartMeasurement", "StartMeasurement", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Start Measurement", "1 second", "0.1"},
+    {"\$(P)", "MEAS:STOP", "StopMeasurement", "StopMeasurement", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Stop Measurement", "1 second", "0.1"},
+    {"\$(P)", "MOT:START", "StartMotor", "StartMotor", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Start Motor", "1 second", "0.1"},
+    {"\$(P)", "MOT:STOP", "StopMotor", "StopMotor", "False", "True", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "", "Stop Motor", "1 second", "0.1"}
+}
+
+file  $(LVREMOTE)/data/lvremote_double.template { 
+  pattern 
+    {P, NAME, IND, CONTROL, VI, PORT, READONLY, WRITEONLY, SIMRECORD, DESCRIPTION, SCAN}
+    
+    {"\$(P)", "_SPEED", "Speed", "Speed", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "","","", "Speed", "1 second"},
+    {"\$(P)", "UPPER_LIMIT", "Upper Limit", "Upper Limit", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "","","", "Upper Limit", "1 second"},
+    {"\$(P)", "LOWER_LIMIT", "Lower Limit", "Lower Limit", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "","","", "Lower Limit", "1 second"}
+}
+
+file  $(LVREMOTE)/data/lvremote_enum.template { 
+  pattern 
+    {P, NAME, IND, CONTROL, VI, PORT, PORT2, READONLY, DESCRIPTION, SCAN, ZRST, ONST, TWST, THST,FRST,FVST,SXST, ZRVL, ONVL, TWVL, THVL,FRVL,FVVL,SXVL}
+    
+    {"\$(P)", "MODE:SPEED", "Mode", "Mode", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Speed Mode", "1 second", "Manual", "Standard", "Load Const", "","","","", "0", "1", "2", "0","0","0","0"},
+    {"\$(P)", "CONTROL:SPEED", "Control", "Control", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Speed Control", "1 second", "Tacho", "Load", "Elongation", "Elongation 2","","","", "0", "1", "2", "3","0","0","0"},
+    {"\$(P)", "DIRECTION:SPEED", "Direction", "Direction", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Speed Direction", "1 second", "Forward", "Forward2", "Reverse", "","","","", "0", "1", "2", "3","0","0","0"},
+    {"\$(P)", "MODE:STAT", "Mode String", "Set Mode", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Set Mode", "1 second", "Manual", "Standard", "Load Const", "Elong 2","","","", "0", "1", "2", "3","0","0","0"},
+    {"\$(P)", "MOT:MODE", "Motor Control Mode String", "Set Control", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Set Control", "1 second", "Tacho", "Load", "Elongation", "Elongation 2","","","", "0", "1", "2", "3","0","0","0"},
+    {"\$(P)", "DIR", "Direction String", "Set Direction", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Set Direction", "1 second", "Forward", "Forward2", "Reverse", "","","","", "0", "1", "2", "3","0","0","0"},
+    {"\$(P)", "CHANNEL", "Choose Channel", "Choose Channel", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "", "Channel", "1 second", "Time", "Load", "Elongation", "Elong2","","","", "0", "1", "2", "3","0","0","0"}
+
+    {"\$(P)", "MOT:STAT", "Motor Status String", "Motor Status String", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "#", "Motor Status", "1 second", "Stop", "Forward", "Reverse", "","","","", "0", "1", "2", "0","0","0","0"},
+    {"\$(P)", "CON:STAT", "Control Status String", "Control Status String", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "#", "Control Status", "1 second", "Idle", "Read", "Active","Hold","HoldEnd","AutoZero","AutoKeepConst", "0","1","2","3","4","5","6"},
+    {"\$(P)", "TEMP:STAT", "Temp Status String", "Temp Status String", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "\$(STRING_PORT)", "#", "Temp Status String", "1 second", "Stop", "Heating", "Cooling", "","","","", "0", "1", "2", "0","0","0","0"},  
+}
+
+file $(LVREMOTE)/data/lvremote_array.template {
+  pattern
+  {P, NAME, IND, CONTROL, VI, PORT, DESCRIPTION, SCAN, TYPE, INDEX}
+
+  {"\$(P)", "ARRAY", "Display", "Display", "$(VI_PATH)dds Server.vi", "\$(NUM_PORT)", "Display", "1 second", "DOUBLE", "7"}
+}
