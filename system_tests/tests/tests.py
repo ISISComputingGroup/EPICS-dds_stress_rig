@@ -1,11 +1,10 @@
 import unittest
 
+from parameterized import parameterized
 from utils.channel_access import ChannelAccess
 from utils.ioc_launcher import get_default_ioc_dir
 from utils.test_modes import TestModes
-from utils.testing import get_running_lewis_and_ioc, skip_if_recsim, skip_if_devsim
-from parameterized import parameterized
-
+from utils.testing import get_running_lewis_and_ioc, skip_if_devsim
 
 DEVICE_PREFIX = "DDSSTRES_01"
 
@@ -14,7 +13,7 @@ IOCS = [
     {
         "name": DEVICE_PREFIX,
         "directory": get_default_ioc_dir("DDSSTRES"),
-        "macros": {"IPADDR":"127.0.0.1", "VI_PATH":"C:/instrument/dev/ibex_vis/"},
+        "macros": {"IPADDR": "127.0.0.1", "VI_PATH": "C:/instrument/dev/ibex_vis/"},
         "emulator": "dds_stress_rig",
     },
 ]
@@ -27,14 +26,21 @@ class DdsStressRigTests(unittest.TestCase):
     """
     Tests for the DDS_Stress_rig IOC.
     """
+
     def setUp(self):
         self._lewis, self._ioc = get_running_lewis_and_ioc("dds_stress_rig", DEVICE_PREFIX)
         self.ca = ChannelAccess(device_prefix=DEVICE_PREFIX)
 
-    @parameterized.expand([("upper_limit", 1, [-1, 0, 0, 0, 0, 0, 0], "True", "False", "UPPER", "LOWER"),
-                           ("lower_limit", -1, [1, 0, 0, 0, 0, 0, 0], "False", "True", "LOWER", "UPPER")])
+    @parameterized.expand(
+        [
+            ("upper_limit", 1, [-1, 0, 0, 0, 0, 0, 0], "True", "False", "UPPER", "LOWER"),
+            ("lower_limit", -1, [1, 0, 0, 0, 0, 0, 0], "False", "True", "LOWER", "UPPER"),
+        ]
+    )
     @skip_if_devsim("Requires use of SIM Record")
-    def test_WHEN_start_sequence_THEN_correct_limit(self, _, target, elong, ulimit, llimit, set, unset):
+    def test_WHEN_start_sequence_THEN_correct_limit(
+        self, _, target, elong, ulimit, llimit, set, unset
+    ):
         self.ca.set_pv_value("LOWER_LIMIT:SP", 0)
         self.ca.set_pv_value("UPPER_LIMIT:SP", 0)
 
@@ -61,4 +67,3 @@ class DdsStressRigTests(unittest.TestCase):
         self.ca.assert_that_pv_is("TIME", time)
 
         self.ca.set_pv_value("SIM:ARRAY", [0, 0, 0, 0, 0, 0, 0])
-
