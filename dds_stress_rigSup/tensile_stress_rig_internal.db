@@ -82,3 +82,20 @@ record(calc, "$(P)_START_LIMIT") {
 record(bo, "$(P)SET_LOAD"){
     field(DESC, "Command Sequence to set a load.")
 }
+
+record(mbbo, "$(P)STATEMACHINE:STATE") {
+    field(ZRST, "neutral")
+    field(ONST, "stopDelay")
+    field(TWST, "clearLimit")
+    field(THST, "s1")
+    field(FRST, "l1")
+	field(FVST, "resetLimit")
+    field(SXST, "s2")
+    field(SVST, "l2")
+    field(EIST, "startGreater")
+    field(NIST, "startLesser")
+    field(TEST, "startState")
+    field(ELST, "l3")
+	
+	info(archive, "VAL")
+}

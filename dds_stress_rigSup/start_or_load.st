@@ -8,6 +8,12 @@ program start_or_load("P")
 %% #include "errlog.h"
 %% #include "alarm.h"
 
+option +d;
+option +r;
+option +s;
+
+/* Debugging: current state of this state machine */
+PV(string, statemachine_state, "{P}STATEMACHINE:STATE", NoMon);
 
 PV(int, stopMeasurement, "{P}MEAS:STOP:SP", NoMon);
 PV(int, setChannel, "{P}CHANNEL:SP", NoMon);
@@ -22,20 +28,22 @@ PV(int, setModeStat, "{P}MODE:STAT:SP", NoMon);
 PV(int, getModeStat, "{P}MODE:STAT", Monitor);
 PV(float, target, "{P}TRGT", Monitor);
 PV(float, elong, "{P}ELONG", Monitor);
-PV(float, target, "{P}LOAD:SP", Monitor);
+PV(float, load, "{P}LOAD:SP", Monitor);
 PV(float, upperLimit, "{P}UPPER_LIMIT:SP", NoMon);
 PV(float, lowerLimit, "{P}LOWER_LIMIT:SP", NoMon);
 PV(int, startMeasurement, "{P}MEAS:START:SP", NoMon);
 PV(int, start, "{P}START", Monitor);
-PV(int, load, "{P}SET_LOAD", Monitor);
+PV(int, setLoad, "{P}SET_LOAD", Monitor);
 int preMeasure = 0;
-enum mode {noMode = 0, loadMode = 1, startMode = 2};
+%{ 
+    enum{noMode, loadMode, startMode} mode=noMode;
+}%
 %{
   static const char* const PROGRAM_NAME = "start_or_load.st";
 
   /* This needs to be a macro as the call to pvIndex has to happen from SNL code, not C code. */
   /* See https://www-csr.bessy.de/control/SoftDist/sequencer/EscapeToC.html?highlight=pvindex#calling-pv-functions-from-c */
-  #define DDS_STRESS_TRANSITION_TO_STATE(x) DDS_STRESS_state_transition(ssId, pVar, pvIndex(statemachine_state), (x))
+  #define DDS_STRESS_TRANSITION_TO_STATE(x) dds_stress_state_transition(ssId, pVar, pvIndex(statemachine_state), (x))
   
   static void dds_stress_state_transition(SS_ID ssId, struct seqg_vars* const pVar, CH_ID index, const char* const new_state_name);
 }%
@@ -46,15 +54,15 @@ ss start_or_load
     {
         entry {DDS_STRESS_TRANSITION_TO_STATE("neutral");}
     
-        when (start == 1 || load == 1) {
+        when (start == 1 || setLoad == 1) {
             stopMeasurement = 1;
             if (start == 1){
-                mode = start
+                mode = startMode;
             }else{
-                mode = load
+                mode = loadMode;
             }
             
-            PVPUT(stopMeasurement);
+            pvPut(stopMeasurement);
             
         } state stopDelay
     }
@@ -66,7 +74,7 @@ ss start_or_load
 
         } state clearLimit
         when (delay(0.4) && preMeasure == 1){
-            preMeasure = 0
+            preMeasure = 0;
         } state startState
     }
     
@@ -76,20 +84,20 @@ ss start_or_load
         { 
             DDS_STRESS_TRANSITION_TO_STATE("clearLimit");
             setChannel = mode;
-            PVPUT(setChannel);
+            pvPut(setChannel);
         }
 
         when (getChannel == 1 && setChannel == 1){
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 0;
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         } state s1
         when (getChannel == 2 && setChannel == 2){
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 0;
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         } state l1
     }
 
@@ -102,7 +110,7 @@ ss start_or_load
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
             setChannel = 2;
-            PVPUT(setChannel);
+            pvPut(setChannel);
         } state resetLimit
     }
 
@@ -115,7 +123,7 @@ ss start_or_load
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
             setChannel = 1;
-            PVPUT(setChannel);
+            pvPut(setChannel);
         } state resetLimit
     }
 
@@ -126,17 +134,17 @@ ss start_or_load
             DDS_STRESS_TRANSITION_TO_STATE("resetLimit");
         }   
 
-        when(getChannel == setChannel && mode == start){
+        when(getChannel == setChannel && mode == startMode){
             setUpLimitEnabled = getUpLimitEnabled;
             setLowLimitEnabled = getUpLimitEnabled;
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         } state s2
-        when(getChannel == setChannel && mode == load){
+        when(getChannel == setChannel && mode == loadMode){
             setUpLimitEnabled = getUpLimitEnabled;
             setLowLimitEnabled = getUpLimitEnabled;
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         } state l2
     }
 
@@ -147,17 +155,17 @@ ss start_or_load
             DDS_STRESS_TRANSITION_TO_STATE("s2");
             setMotorMode = 0;
             setModeStat = 0;
-            PVPUT(setMotorMode);
-            PVPUT(setModeStat);
+            pvPut(setMotorMode);
+            pvPut(setModeStat);
         }   
 
         when(getModeStat == setModeStat && target>elong){
-            setModeStat = 1
-            PVPUT(setModeStat)
+            setModeStat = 1;
+            pvPut(setModeStat);
         } state startGreater
         when(getModeStat == setModeStat && target<=elong){
             setModeStat = 1;
-            PVPUT(setModeStat);
+            pvPut(setModeStat);
         } state startLesser
     }
 
@@ -168,13 +176,13 @@ ss start_or_load
             DDS_STRESS_TRANSITION_TO_STATE("l2");
             setMotorMode = 0;
             setModeStat = 0;
-            PVPUT(setMotorMode);
-            PVPUT(setModeStat);
+            pvPut(setMotorMode);
+            pvPut(setModeStat);
         }   
 
         when(getModeStat == setModeStat){
-            setModeStat = 1
-            PVPUT(setModeStat)
+            setModeStat = 1;
+            pvPut(setModeStat);
         } state l3
     }
 
@@ -187,10 +195,10 @@ ss start_or_load
             upperLimit = load;
             setUpLimitEnabled = 1;
             setLowLimitEnabled = 1;
-            PVPUT(upperLimit);
-            PVPUT(lowerLimit);
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(upperLimit);
+            pvPut(lowerLimit);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         }   
 
         when(getLowLimitEnabled == 1 && getUpLimitEnabled == 1){
@@ -205,14 +213,14 @@ ss start_or_load
             upperLimit = target;
             setUpLimitEnabled = 1;
             setLowLimitEnabled = 0;
-            PVPUT(upperLimit);
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(upperLimit);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         }
 
         when(getUpLimitEnabled == setUpLimitEnabled && getLowLimitEnabled == setLowLimitEnabled)
         {
-            preMeasure = 1
+            preMeasure = 1;
         } state stopDelay
     }
 
@@ -224,14 +232,14 @@ ss start_or_load
             lowerLimit = target;
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 1;
-            PVPUT(lowerLimit);
-            PVPUT(setUpLimitEnabled);
-            PVPUT(setLowLimitEnabled);
+            pvPut(lowerLimit);
+            pvPut(setUpLimitEnabled);
+            pvPut(setLowLimitEnabled);
         }
 
         when(getUpLimitEnabled == setUpLimitEnabled && getLowLimitEnabled == setLowLimitEnabled)
         {
-            preMeasure = 1
+            preMeasure = 1;
         } state stopDelay
     }
 
@@ -241,10 +249,22 @@ ss start_or_load
         {
             DDS_STRESS_TRANSITION_TO_STATE("startState");
             startMeasurement = 1;
-            PVPUT(startMeasurement);
+            pvPut(startMeasurement);
         }
         when(delay(0.4)){
             mode = noMode;
         } state neutral
     }
 }
+
+%{
+    /**
+     * Called on any state transitions that occur in the state machine - primarily for debugging.
+     */
+    static void dds_stress_state_transition(SS_ID ssId, struct seqg_vars* const pVar, CH_ID index, const char* const new_state_name)
+    {
+      strncpy(pVar->statemachine_state, new_state_name, MAX_STRING_SIZE);
+      seq_pvPut(ssId, index, SYNC);
+      errlogSevPrintf(errlogInfo, "%s:  Entering state %s\n", PROGRAM_NAME, new_state_name);
+    }
+  }%
