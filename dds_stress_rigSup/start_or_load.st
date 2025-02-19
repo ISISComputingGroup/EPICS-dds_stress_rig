@@ -1,4 +1,12 @@
+program start_or_load("P")
+
 #include "ibexSeqPVmacros.h"
+%% #include "seq_snc.h"
+%% #include "epicsTime.h"
+%% #include "string.h"
+%% #include "math.h"
+%% #include "errlog.h"
+%% #include "alarm.h"
 
 
 PV(int, stopMeasurement, "{P}MEAS:STOP:SP", NoMon);
@@ -27,16 +35,16 @@ enum mode {noMode = 0, loadMode = 1, startMode = 2};
 
   /* This needs to be a macro as the call to pvIndex has to happen from SNL code, not C code. */
   /* See https://www-csr.bessy.de/control/SoftDist/sequencer/EscapeToC.html?highlight=pvindex#calling-pv-functions-from-c */
-  #define G3HP_TRANSITION_TO_STATE(x) g3hp_state_transition(ssId, pVar, pvIndex(statemachine_state), (x))
+  #define DDS_STRESS_TRANSITION_TO_STATE(x) DDS_STRESS_state_transition(ssId, pVar, pvIndex(statemachine_state), (x))
   
-  static void g3hp_state_transition(SS_ID ssId, struct seqg_vars* const pVar, CH_ID index, const char* const new_state_name);
+  static void dds_stress_state_transition(SS_ID ssId, struct seqg_vars* const pVar, CH_ID index, const char* const new_state_name);
 }%
 
 ss start_or_load
 {
     state neutral
     {
-        entry {G3HP_TRANSITION_TO_STATE("neutral");}
+        entry {DDS_STRESS_TRANSITION_TO_STATE("neutral");}
     
         when (start == 1 || load == 1) {
             stopMeasurement = 1;
@@ -53,7 +61,7 @@ ss start_or_load
 
     state stopDelay 
     {
-        entry {G3HP_TRANSITION_TO_STATE("stopDelay");}
+        entry {DDS_STRESS_TRANSITION_TO_STATE("stopDelay");}
         when (delay(0.4) && preMeasure == 0){
 
         } state clearLimit
@@ -66,7 +74,7 @@ ss start_or_load
     {
         entry
         { 
-            G3HP_TRANSITION_TO_STATE("clearLimit");
+            DDS_STRESS_TRANSITION_TO_STATE("clearLimit");
             setChannel = mode;
             PVPUT(setChannel);
         }
@@ -89,7 +97,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("s1");
+            DDS_STRESS_TRANSITION_TO_STATE("s1");
         }   
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
@@ -102,7 +110,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("l1");
+            DDS_STRESS_TRANSITION_TO_STATE("l1");
         }   
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
@@ -115,7 +123,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("resetLimit");
+            DDS_STRESS_TRANSITION_TO_STATE("resetLimit");
         }   
 
         when(getChannel == setChannel && mode == start){
@@ -136,7 +144,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("s2");
+            DDS_STRESS_TRANSITION_TO_STATE("s2");
             setMotorMode = 0;
             setModeStat = 0;
             PVPUT(setMotorMode);
@@ -157,7 +165,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("l2");
+            DDS_STRESS_TRANSITION_TO_STATE("l2");
             setMotorMode = 0;
             setModeStat = 0;
             PVPUT(setMotorMode);
@@ -174,7 +182,7 @@ ss start_or_load
     {
          entry
         { 
-            G3HP_TRANSITION_TO_STATE("l3");
+            DDS_STRESS_TRANSITION_TO_STATE("l3");
             lowerLimit = load;
             upperLimit = load;
             setUpLimitEnabled = 1;
@@ -193,7 +201,7 @@ ss start_or_load
     {
         entry
         {
-            G3HP_TRANSITION_TO_STATE("startGreater");
+            DDS_STRESS_TRANSITION_TO_STATE("startGreater");
             upperLimit = target;
             setUpLimitEnabled = 1;
             setLowLimitEnabled = 0;
@@ -212,7 +220,7 @@ ss start_or_load
     {
         entry
         {
-            G3HP_TRANSITION_TO_STATE("startLesser");
+            DDS_STRESS_TRANSITION_TO_STATE("startLesser");
             lowerLimit = target;
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 1;
@@ -231,7 +239,7 @@ ss start_or_load
     {
         entry
         {
-            G3HP_TRANSITION_TO_STATE("startState");
+            DDS_STRESS_TRANSITION_TO_STATE("startState");
             startMeasurement = 1;
             PVPUT(startMeasurement);
         }

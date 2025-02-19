@@ -1,1 +1,1 @@
-registrar(fsmRegistrar)
+registrar(start_or_loadRegistrar)

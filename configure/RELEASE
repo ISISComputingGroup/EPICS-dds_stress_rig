@@ -1,11 +1,13 @@
 # optional extra local definitions here
 -include $(TOP)/configure/RELEASE.private
 
+SNCSEQ=$(SUPPORT)/seq/master
+UTILITIES=$(SUPPORT)/utilities/master
+
 include $(TOP)/../../../ISIS_CONFIG
 -include $(TOP)/../../../ISIS_CONFIG.$(EPICS_HOST_ARCH)
 
 # Macros required for basic ioc/stream device
-SNCSEQ=$(SUPPORT)/seq/master
-UTILITIES=$(SUPPORT)/utilities/master
+
 
 LVREMOTE=$(SUPPORT)/lvremote/master
