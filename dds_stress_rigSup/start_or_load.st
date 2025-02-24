@@ -12,6 +12,7 @@ option +d;
 option +r;
 option +s;
 
+
 /* Debugging: current state of this state machine */
 PV(string, statemachine_state, "{P}STATEMACHINE:STATE", NoMon);
 
@@ -32,8 +33,8 @@ PV(float, load, "{P}LOAD:SP", Monitor);
 PV(float, upperLimit, "{P}UPPER_LIMIT:SP", NoMon);
 PV(float, lowerLimit, "{P}LOWER_LIMIT:SP", NoMon);
 PV(int, startMeasurement, "{P}MEAS:START:SP", NoMon);
-PV(int, start, "{P}START", Monitor);
-PV(int, setLoad, "{P}SET_LOAD", Monitor);
+PV(int, start, "{P}START.RVAL", Monitor);
+PV(int, setLoad, "{P}SET_LOAD.RVAL", Monitor);
 int preMeasure = 0;
 %{ 
     enum{noMode, loadMode, startMode} mode=noMode;
@@ -202,6 +203,7 @@ ss start_or_load
         }   
 
         when(getLowLimitEnabled == 1 && getUpLimitEnabled == 1){
+            preMeasure = 1;
         } state stopDelay
     }
 

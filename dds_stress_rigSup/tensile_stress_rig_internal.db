@@ -54,17 +54,9 @@ record(ao, "$(P)SPEED:SP") {
 
 record(bo, "$(P)START"){
     field(DESC, "Command Sequence to request a Start.")
-}
-
-record(bo, "$(P)_START_SEQ_ONGOING"){
-    field(DESC, "Used to calc when to continue start SEQ")
-}
-
-record(calcout, "$(P)_START_CHANNEL_ELONG"){
-    field(DESC, "Ensure channel is Elong before contuing")
-    field(CALC, "(A=2)&&(B=1)")
-    field(INPA, "$(P)TRGT CP MS")
-    field(INPB, "$(P)ELONG CP MS")
+    field(HIGH, "1")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
 }
 
 record(ao, "$(P)TRGT") {
@@ -72,15 +64,11 @@ record(ao, "$(P)TRGT") {
     field(EGU, "um")
 }
 
-record(calc, "$(P)_START_LIMIT") {
-    field(DESC, "Start sequence limit mask")
-    field(CALC, "a>b?13823:15103")
-    field(INPA, "$(P)TRGT CP MS")
-    field(INPB, "$(P)ELONG CP MS")
-}
-
 record(bo, "$(P)SET_LOAD"){
     field(DESC, "Command Sequence to set a load.")
+    field(HIGH, "1")
+    field(ZNAM, "OFF")
+    field(ONAM, "ON")
 }
 
 record(mbbo, "$(P)STATEMACHINE:STATE") {
