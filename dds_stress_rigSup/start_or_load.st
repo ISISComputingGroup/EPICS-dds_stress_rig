@@ -35,9 +35,20 @@ PV(float, lowerLimit, "{P}LOWER_LIMIT:SP", NoMon);
 PV(int, startMeasurement, "{P}MEAS:START:SP", NoMon);
 PV(int, start, "{P}START.RVAL", Monitor);
 PV(int, setLoad, "{P}SET_LOAD.RVAL", Monitor);
+PV(int, setSpeed, "{P}CHANGE_SPEED.RVAL", Monitor);
+PV(int, setSpeedMode, "{P}MODE:SPEED:SP", NoMon);
+PV(int, setControl, "{P}CONTROL:SPEED:SP", NoMon);
+PV(int, setDirection, "{P}DIRECTION:SPEED:SP", NoMon);
+PV(int, getSpeedMode, "{P}MODE:SPEED", Monitor);
+PV(int, getControl, "{P}CONTROL:SPEED", Monitor);
+PV(int, getDirection, "{P}DIRECTION:SPEED", Monitor);
+PV(int, speedVal, "{P}_SPEED:SP", NoMon);
+PV(int, setSpeedVal, "{P}SPEED:SP", Monitor);
+PV(int, getSpeedVal, "{P}_SPEED", Monitor);
+PV(int, setSpeedSP, "{P}SPEED:SET:SP", NoMon);
 int preMeasure = 0;
 %{ 
-    enum{noMode, loadMode, startMode} mode=noMode;
+    enum{noMode = 0, loadMode = 1, startMode = 2} mode=noMode;
 }%
 %{
   static const char* const PROGRAM_NAME = "start_or_load.st";
@@ -66,6 +77,53 @@ ss start_or_load
             pvPut(stopMeasurement);
             
         } state stopDelay
+        when (setSpeed == 1) {
+            setSpeed = 0;
+            pvPut(setSpeed);
+        } state speed1
+    }
+
+    state speed1
+    {
+        entry 
+        {
+            DDS_STRESS_TRANSITION_TO_STATE("speed1");
+            setSpeedMode = 1;
+            setControl = 0;
+            setDirection = 0;
+            pvPut(setSpeedMode);
+            pvPut(setControl);
+            pvPut(setDirection);
+        }
+
+        when (getDirection == 0 && getSpeedMode == 1 && getControl == 0){
+            speedVal = setSpeedVal;
+            pvPut(speedVal);
+        } state speed2
+    }
+
+    state speed2
+    {
+        entry{DDS_STRESS_TRANSITION_TO_STATE("speed2");}
+        when(getSpeedVal == speedVal){
+            setSpeedSP = 1;
+            pvPut(setSpeedSP);
+        } state speed3
+    }
+
+    state speed3
+    {
+        entry
+        {
+            DDS_STRESS_TRANSITION_TO_STATE("speed3");
+            setDirection = 2;
+            pvPut(setDirection);
+        }
+        when(getDirection == setDirection){
+            setSpeedSP = 1;
+            pvPut(setSpeedSP);
+        } state neutral
+        
     }
 
     state stopDelay 
@@ -84,29 +142,34 @@ ss start_or_load
         entry
         { 
             DDS_STRESS_TRANSITION_TO_STATE("clearLimit");
-            setChannel = mode;
+            if (mode == loadMode) {
+                setChannel = startMode;
+            }else{
+                setChannel = loadMode;
+            }
+            
             pvPut(setChannel);
         }
 
-        when (getChannel == 1 && setChannel == 1){
+        when (getChannel == loadMode && setChannel == loadMode){
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 0;
             pvPut(setUpLimitEnabled);
             pvPut(setLowLimitEnabled);
-        } state s1
-        when (getChannel == 2 && setChannel == 2){
+        } state start1
+        when (getChannel == startMode && setChannel == startMode){
             setUpLimitEnabled = 0;
             setLowLimitEnabled = 0;
             pvPut(setUpLimitEnabled);
             pvPut(setLowLimitEnabled);
-        } state l1
+        } state load1
     }
 
-    state s1
+    state start1
     {
          entry
         { 
-            DDS_STRESS_TRANSITION_TO_STATE("s1");
+            DDS_STRESS_TRANSITION_TO_STATE("start1");
         }   
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
@@ -115,11 +178,11 @@ ss start_or_load
         } state resetLimit
     }
 
-    state l1
+    state load1
     {
          entry
         { 
-            DDS_STRESS_TRANSITION_TO_STATE("l1");
+            DDS_STRESS_TRANSITION_TO_STATE("load1");
         }   
 
         when(getLowLimitEnabled == 0 && getUpLimitEnabled == 0){
@@ -140,20 +203,20 @@ ss start_or_load
             setLowLimitEnabled = getUpLimitEnabled;
             pvPut(setUpLimitEnabled);
             pvPut(setLowLimitEnabled);
-        } state s2
+        } state start2
         when(getChannel == setChannel && mode == loadMode){
             setUpLimitEnabled = getUpLimitEnabled;
             setLowLimitEnabled = getUpLimitEnabled;
             pvPut(setUpLimitEnabled);
             pvPut(setLowLimitEnabled);
-        } state l2
+        } state load2
     }
 
-    state s2
+    state start2
     {
          entry
         { 
-            DDS_STRESS_TRANSITION_TO_STATE("s2");
+            DDS_STRESS_TRANSITION_TO_STATE("start2");
             setMotorMode = 0;
             setModeStat = 0;
             pvPut(setMotorMode);
@@ -170,11 +233,11 @@ ss start_or_load
         } state startLesser
     }
 
-    state l2
+    state load2
     {
          entry
         { 
-            DDS_STRESS_TRANSITION_TO_STATE("l2");
+            DDS_STRESS_TRANSITION_TO_STATE("load2");
             setMotorMode = 0;
             setModeStat = 0;
             pvPut(setMotorMode);
@@ -184,14 +247,14 @@ ss start_or_load
         when(getModeStat == setModeStat){
             setModeStat = 1;
             pvPut(setModeStat);
-        } state l3
+        } state load3
     }
 
-    state l3
+    state load3
     {
          entry
         { 
-            DDS_STRESS_TRANSITION_TO_STATE("l3");
+            DDS_STRESS_TRANSITION_TO_STATE("load3");
             lowerLimit = load;
             upperLimit = load;
             setUpLimitEnabled = 1;
