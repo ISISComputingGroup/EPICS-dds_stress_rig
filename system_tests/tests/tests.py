@@ -33,8 +33,8 @@ class DdsStressRigTests(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("upper_limit", 1, [-1, 0, 0, 0, 0, 0, 0], "True", "False", "UPPER", "LOWER"),
-            ("lower_limit", -1, [1, 0, 0, 0, 0, 0, 0], "False", "True", "LOWER", "UPPER"),
+            ("upper_limit", 1, [1, 0, 0, 0, 0, 0, 0], "True", "False", "UPPER", "LOWER"),
+            ("lower_limit", -1, [-1, 0, 0, 0, 0, 0, 0], "False", "True", "LOWER", "UPPER"),
         ]
     )
     @skip_if_devsim("Requires use of SIM Record")
@@ -46,7 +46,7 @@ class DdsStressRigTests(unittest.TestCase):
 
         self.ca.set_pv_value("SIM:ARRAY", elong)
         self.ca.set_pv_value("TRGT", target)
-        self.ca.set_pv_value("START.PROC", 1)
+        self.ca.set_pv_value("START", 1)
         self.ca.assert_that_pv_is("MEAS:STOP:SP", "False")
         self.ca.assert_that_pv_is("MOT:MODE:SP", "Tacho")
         self.ca.assert_that_pv_is("ULIMIT:ENABLED:SP", ulimit)
@@ -59,8 +59,8 @@ class DdsStressRigTests(unittest.TestCase):
         elong = 1.23
         load = 3.34
         time = 87.2
-        self.ca.set_pv_value("SIM:ARRAY", [elong, load, time, 0, 0, 0, 0])
-        self.ca.assert_that_pv_is("ARRAY", [elong, load, time, 0, 0, 0, 0])
+        self.ca.set_pv_value("SIM:ARRAY", [time, load, elong, 0, 0, 0, 0])
+        self.ca.assert_that_pv_is("ARRAY", [time, load, elong, 0, 0, 0, 0])
 
         self.ca.assert_that_pv_is("ELONG", elong)
         self.ca.assert_that_pv_is("LOAD", load)
