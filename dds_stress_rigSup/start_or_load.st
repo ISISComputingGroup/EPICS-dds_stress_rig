@@ -42,9 +42,9 @@ PV(int, setDirection, "{P}DIRECTION:SPEED:SP", NoMon);
 PV(int, getSpeedMode, "{P}MODE:SPEED", Monitor);
 PV(int, getControl, "{P}CONTROL:SPEED", Monitor);
 PV(int, getDirection, "{P}DIRECTION:SPEED", Monitor);
-PV(int, speedVal, "{P}_SPEED:SP", NoMon);
-PV(int, setSpeedVal, "{P}SPEED:SP", Monitor);
-PV(int, getSpeedVal, "{P}_SPEED", Monitor);
+PV(float, speedVal, "{P}_SPEED:SP", NoMon);
+PV(float, setSpeedVal, "{P}SPEED:SP", Monitor);
+PV(float, getSpeedVal, "{P}_SPEED", Monitor);
 PV(int, setSpeedSP, "{P}SPEED:SET:SP", NoMon);
 int preMeasure = 0;
 %{ 
